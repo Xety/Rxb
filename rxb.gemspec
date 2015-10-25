@@ -4,7 +4,7 @@ require "Rxb/version"
 
 Gem::Specification.new do |spec|
   spec.name          = "rxb"
-  spec.version       = Rxb::VERSION
+  spec.version       = Rxb::Version::VERSION
   spec.authors       = ["Mars"]
   spec.email         = ["zoro.fmt@gmail.com"]
   spec.summary       = "Ruby + Xat + Bot = Rxb"

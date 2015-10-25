@@ -6,3 +6,5 @@ bot:
     name: 'Bot Ruby'
     avatar: 'http://i.imgur.com/SS3qHms.png'
     homepage: 'https://github.com/Xety/MarsBot'
+
+debug: true

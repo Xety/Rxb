@@ -16,6 +16,7 @@ module Rxb
 
         def load_config()
             @config = YAML::load_file(File.join(__dir__, '../../config/config.yml'))
+            Rxb::Xat.load_config(@config)
         end
 
         def login()
@@ -131,35 +132,17 @@ module Rxb
                                     message = message.join(" ").strip
 
                                     if message.split('')[0] == "/"
-                                        Rxb::Xat.write(Rxb::Xat.build_packet({
-                                            node: 'm',
-                                            elements: {
-                                                t: "Nah.",
-                                                u: @config['bot']['id']
-                                            }
-                                        }))
+                                        Rxb::Xat.write_message("Nah.")
                                     else
-                                        Rxb::Xat.write(Rxb::Xat.build_packet({
-                                            node: 'm',
-                                            elements: {
-                                                t: message,
-                                                u: @config['bot']['id']
-                                            }
-                                        }))
+                                        Rxb::Xat.write_message(message)
                                     end
                                 when "info"
-                                    Rxb::Xat.write(Rxb::Xat.build_packet({
-                                        node: 'm',
-                                        elements: {
-                                            t: "I'm coded in Ruby by Mars. Check how my body is made : https://github.com/Xety/BotRuby :$",
-                                            u: @config['bot']['id']
-                                        }
-                                    }))
+                                    Rxb::Xat.write_message("Version : #{Rxb::Version::VERSION}  I'm coded in Ruby by Mars. Check how my body is made : https://github.com/Xety/Rxb :$")
                                 when "memory"
                                     memory = `ps -o rss -p #{$$}`.strip.split.last.to_i / 1024
-                                    Rxb::Xat.write_message("Memory used (Standard CMD) : #{memory} Mb", @config['bot']['id'])
+                                    Rxb::Xat.write_message("Memory used (Standard CMD) : #{memory} Mb")
                                 else
-                                    Rxb::Xat.write_message("Unknown command: #{message[0]}", @config['bot']['id'])
+                                    Rxb::Xat.write_message("Unknown command: #{message[0]}")
                             end
                         end
                     end

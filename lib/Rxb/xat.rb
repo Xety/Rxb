@@ -4,12 +4,16 @@ module Rxb
     class Xat
         class << self
 
+            def load_config(config)
+                @config = config
+            end
+
             def connect(ip, port)
                 @socket = TCPSocket.open(ip, port)
             end
 
             def write(message)
-                puts "--> #{message}"
+                puts "--> #{message}" if @config['debug']
 
                 @socket.write(message + 0.chr)
             end
@@ -18,7 +22,7 @@ module Rxb
                 response =  @socket.recv(1024)
 
                 if !response.empty?
-                    puts "<-- #{response}"
+                    puts "<-- #{response}" if @config['debug']
 
                     return response.chomp
                 end
@@ -41,12 +45,12 @@ module Rxb
                 return string
             end
 
-            def write_message(message, id)
+            def write_message(message)
                 write(build_packet({
                     node: 'm',
                     elements: {
                         t: message,
-                        u: id
+                        u: @config['bot']['id']
                     }
                 }))
             end
