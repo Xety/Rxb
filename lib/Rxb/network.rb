@@ -1,7 +1,6 @@
-require "nokogiri"
-require "nori"
-require "date"
-require "yaml"
+require 'nokogiri'
+require 'nori'
+require 'yaml'
 
 module Rxb
     class Network
@@ -73,42 +72,7 @@ module Rxb
                 packet.scan(/(<[\w]+[^>]*>)/) do |p|
                     hash = @nori.parse(p[0])
 
-                    if hash.has_key? "y"
-                        @login_packets = @login_packets.merge hash
-
-                        Rxb::Xat.write(Rxb::Xat.build_packet({
-                            node: 'j2',
-                            elements: {
-                                cb: Time.now.to_i,
-                                Y: 2,
-                                l5: 65535,
-                                l4: rand(10...500),
-                                l3: rand(10...500),
-                                l2: 0,
-                                q: 1,
-                                y: @login_packets['y']['@i'],
-                                k: @login_packets['v']['@k1'],
-                                k3: @login_packets['v']['@k3'],
-                                z: 12,
-                                p: 0,
-                                c: @config['bot']['chat'],
-                                r: '',
-                                f: 0,
-                                e: 1,
-                                u: @login_packets['v']['@i'],
-                                d0: @login_packets['v']['@d0'],
-                                d3: @login_packets['v']['@d3'],
-                                dt: @login_packets['v']['@dt'],
-                                N: @login_packets['v']['@n'],
-                                n: @config['bot']['name'],
-                                a: @config['bot']['avatar'],
-                                h: @config['bot']['homepage'],
-                                v: 'Ruby <3'
-                            }
-                        }))
-                    else
-                        handlePacket(hash)
-                    end
+                    handlePacket(hash)
                 end
             end
         end
@@ -116,39 +80,43 @@ module Rxb
         def handlePacket(packet)
             case packet.keys[0]
 
-                when "m"
-                    if (packet['m'].has_key? "@u") && (packet['m'].has_key? "@i") && !(packet['m'].has_key? "@s") && !(packet['m'].has_key? "@p")
-                        cmdPrefix = packet['m']['@t'].split('')[0]
+            when "y"
+                @login_packets = @login_packets.merge packet
+                Rxb::Xat.build_j2(@login_packets)
 
-                        if cmdPrefix == "!"
-                            packet['m']['@t'] = packet['m']['@t'][1, packet['m']['@t'].length - 0]
+            when "m"
+                if (packet['m'].has_key? "@u") && (packet['m'].has_key? "@i") && !(packet['m'].has_key? "@s") && !(packet['m'].has_key? "@p")
+                    cmdPrefix = packet['m']['@t'].split('')[0]
 
-                            message = packet['m']['@t'].split(' ')
+                    if cmdPrefix == "!"
+                        packet['m']['@t'] = packet['m']['@t'][1, packet['m']['@t'].length - 0]
 
-                            case message[0]
+                        message = packet['m']['@t'].split(' ')
 
-                                when "say"
-                                    message.delete('say')
-                                    message = message.join(" ").strip
+                        case message[0]
 
-                                    if message.split('')[0] == "/"
-                                        Rxb::Xat.write_message("Nah.")
-                                    else
-                                        Rxb::Xat.write_message(message)
-                                    end
-                                when "info"
-                                    Rxb::Xat.write_message("Version : #{Rxb::Version::VERSION}  I'm coded in Ruby by Mars. Check how my body is made : https://github.com/Xety/Rxb :$")
-                                when "memory"
-                                    memory = `ps -o rss -p #{$$}`.strip.split.last.to_i / 1024
-                                    Rxb::Xat.write_message("Memory used (Standard CMD) : #{memory} Mb")
+                            when "say"
+                                message.delete('say')
+                                message = message.join(" ").strip
+
+                                if message.split('')[0] == "/"
+                                    Rxb::Xat.write_message("Nah.")
                                 else
-                                    Rxb::Xat.write_message("Unknown command: #{message[0]}")
-                            end
+                                    Rxb::Xat.write_message(message)
+                                end
+                            when "info"
+                                Rxb::Xat.write_message("Version : #{Rxb::Version::VERSION}  I'm coded in Ruby by Mars. Check how my body is made : https://github.com/Xety/Rxb :$")
+                            when "memory"
+                                memory = `ps -o rss -p #{$$}`.strip.split.last.to_i / 1024
+                                Rxb::Xat.write_message("Memory used (Standard CMD) : #{memory} Mb")
+                            else
+                                Rxb::Xat.write_message("Unknown command: #{message[0]}")
                         end
                     end
+                end
 
-                else
-                    puts "Unknown packet: #{packet.keys[0]}"
+            else
+                puts "Unknown packet: #{packet.keys[0]}"
             end
         end
     end

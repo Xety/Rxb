@@ -1,4 +1,5 @@
 require 'socket'
+require 'date'
 
 module Rxb
     class Xat
@@ -32,6 +33,59 @@ module Rxb
 
             def disconnect()
                 @socket.close
+            end
+
+            def build_j2(packet)
+                j2 = { cb: Time.now.to_i }
+
+                j2[:Y] = 2 if (packet['y'].has_key? '@au')
+
+                j2 = j2.merge({
+                    l5: 65535,
+                    l4: rand(10...500),
+                    l3: rand(10...500),
+                    l2: 0,
+                    q: 1,
+                    y: packet['y']['@i'],
+                    k: packet['v']['@k1'],
+                    k3: packet['v']['@k3']
+                })
+
+                j2[:d1] = packet['v']['@d1'] if (packet['v'].has_key? '@d1')
+
+                j2 = j2.merge({
+                    z: 12,
+                    p: 0,
+                    c: @config['bot']['chat'],
+                    r: '',
+                    f: 0,
+                    e: 1,
+                    u: packet['v']['@i'],
+                    d0: packet['v']['@d0']
+                })
+
+                2.upto(15) do |x|
+                    if packet['v'].has_key? "@d#{x.to_s}"
+                        j2["d#{x.to_s}"] = packet['v']["@d#{x.to_s}"]
+                    end
+                end
+
+                j2[:dO] = packet['v']['@dO'] if (packet['v'].has_key? '@dO')
+                j2[:dx] = packet['v']['@dx'] if (packet['v'].has_key? '@dx')
+                j2[:dt] = packet['v']['@dt'] if (packet['v'].has_key? '@dt')
+
+                j2 = j2.merge({
+                    N: packet['v']['@n'],
+                    n: @config['bot']['name'],
+                    a: @config['bot']['avatar'],
+                    h: @config['bot']['homepage'],
+                    v: 'Ruby <3'
+                })
+
+                write(build_packet({
+                    node: 'j2',
+                    elements: j2
+                }))
             end
 
             def build_packet(data)
