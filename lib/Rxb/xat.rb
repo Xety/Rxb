@@ -20,9 +20,15 @@ module Rxb
             end
 
             def read()
-                response =  @socket.recv(1024)
+                response =  @socket.recv(2048)
 
                 if !response.empty?
+
+                    #We need to read the socket 2 times at the connection because xat send a loooooot of packets. (Specially the old messages)
+                    if response.strip[-1, 1] != '>'
+                        response << @socket.recv(2048)
+                    end
+
                     puts "<-- #{response}" if @config['debug']
 
                     return response.chomp
@@ -105,6 +111,28 @@ module Rxb
                     elements: {
                         t: message,
                         u: @config['bot']['id']
+                    }
+                }))
+            end
+
+            def write_private_message(user, message)
+                write(build_packet({
+                    node: 'p',
+                    elements: {
+                        u: user,
+                        t: message
+                    }
+                }))
+            end
+
+            def write_private_conversation(user, message)
+                write(build_packet({
+                    node: 'p',
+                    elements: {
+                        u: user,
+                        t: message,
+                        s: 2,
+                        d: @config['bot']['id']
                     }
                 }))
             end

@@ -16,6 +16,7 @@ module Rxb
         def load_config()
             @config = YAML::load_file(File.join(__dir__, '../../config/config.yml'))
             Rxb::Xat.load_config(@config)
+            Rxb::Packet.load_config(@config)
         end
 
         def login()
@@ -72,51 +73,13 @@ module Rxb
                 packet.scan(/(<[\w]+[^>]*>)/) do |p|
                     hash = @nori.parse(p[0])
 
-                    handlePacket(hash)
-                end
-            end
-        end
-
-        def handlePacket(packet)
-            case packet.keys[0]
-
-            when "y"
-                @login_packets = @login_packets.merge packet
-                Rxb::Xat.build_j2(@login_packets)
-
-            when "m"
-                if (packet['m'].has_key? "@u") && (packet['m'].has_key? "@i") && !(packet['m'].has_key? "@s") && !(packet['m'].has_key? "@p")
-                    cmdPrefix = packet['m']['@t'].split('')[0]
-
-                    if cmdPrefix == "!"
-                        packet['m']['@t'] = packet['m']['@t'][1, packet['m']['@t'].length - 0]
-
-                        message = packet['m']['@t'].split(' ')
-
-                        case message[0]
-
-                            when "say"
-                                message.delete('say')
-                                message = message.join(" ").strip
-
-                                if message.split('')[0] == "/"
-                                    Rxb::Xat.write_message("Nah.")
-                                else
-                                    Rxb::Xat.write_message(message)
-                                end
-                            when "info"
-                                Rxb::Xat.write_message("Version : #{Rxb::Version::VERSION}  I'm coded in Ruby by Mars. Check how my body is made : https://github.com/Xety/Rxb :$")
-                            when "memory"
-                                memory = `ps -o rss -p #{$$}`.strip.split.last.to_i / 1024
-                                Rxb::Xat.write_message("Memory used (Standard CMD) : #{memory} Mb")
-                            else
-                                Rxb::Xat.write_message("Unknown command: #{message[0]}")
-                        end
+                    if hash.has_key? "y"
+                        @login_packets = @login_packets.merge hash
+                        Rxb::Xat.build_j2(@login_packets)
+                    else
+                        Rxb::Packet.handlePacket(hash)
                     end
                 end
-
-            else
-                puts "Unknown packet: #{packet.keys[0]}"
             end
         end
     end
