@@ -2,6 +2,8 @@ module Rxb
     class Packet
         class << self
 
+            PACKETS = __dir__ + '/packets/'
+
             def load_config(config)
                 @config = config
             end
@@ -10,12 +12,12 @@ module Rxb
                 case packet.keys[0]
 
                 when "idle"
-                    Rxb::Kernel::reload(File.join(__dir__, 'packets/idle.rb'))
+                    Rxb::Kernel::reload(File.join(PACKETS, 'packets/idle.rb'))
                     Rxb::Packets::Idle::onIdle(network)
 
                 when "z"
                     if packet['z']['@t'] == "/l"
-                        Rxb::Kernel::reload(File.join(__dir__, 'packets/z.rb'))
+                        Rxb::Kernel::reload(File.join(PACKETS, 'z.rb'))
                         Rxb::Packets::Z::onTickle(packet['z']['@u'], @config['bot']['id'])
                     end
 
@@ -54,6 +56,7 @@ module Rxb
                     puts "Unknown packet: #{packet.keys[0]}" if @config['debug']
                 end
             end
+
         end
     end
 end
