@@ -77,7 +77,7 @@ module Rxb
                         @login_packets = @login_packets.merge hash
                         Rxb::Xat.build_j2(@login_packets)
                     else
-                        Rxb::Packet.handlePacket(hash)
+                        Rxb::Packet.handlePacket(hash, self)
                     end
                 end
             end

@@ -6,12 +6,12 @@ module Rxb
                 @config = config
             end
 
-            def handlePacket(packet)
+            def handlePacket(packet, network)
                 case packet.keys[0]
 
                 when "idle"
                     Rxb::Kernel::reload(File.join(__dir__, 'packets/idle.rb'))
-                    Rxb::Packets::Idle::onIdle()
+                    Rxb::Packets::Idle::onIdle(network)
 
                 when "z"
                     if packet['z']['@t'] == "/l"

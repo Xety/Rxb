@@ -2,10 +2,11 @@ module Rxb
     module Packets
         class Idle
 
-            def self.onIdle(user, id)
+            def self.onIdle(network)
                 Rxb::Xat.write_message("Need to reconnect, brb.")
-                Rxb::Network.connectToChat()
+                network.connectToChat
             end
+
         end
     end
 end

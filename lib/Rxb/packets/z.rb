@@ -19,6 +19,7 @@ module Rxb
             def self.parseU(user)
                 return user.split('_')[0]
             end
+
         end
     end
 end
